@@ -16,42 +16,49 @@ public class ShopApplication {
 
         ProductManager pm=new ProductManager(Locale.UK);
 
-        Product p20= pm.createProduct(1000,"Water",BigDecimal.valueOf(10.0),Rating.NOT_RATED);
-        p20=pm.reviewProduct(1000,Rating.FIVE_STAR,"nice");
-        p20=pm.reviewProduct(p20,Rating.FOUR_STAR,"nice");
-        p20=pm.reviewProduct(p20,Rating.THREE_STAR,"good");
-        p20=pm.reviewProduct(p20,Rating.FIVE_STAR,"awesome");
-        p20=pm.reviewProduct(p20,Rating.TWO_STAR,"wow");
-        pm.printProductReport(p20);
+        Product p1= pm.createProduct(1000,"Water",BigDecimal.valueOf(10.0),Rating.NOT_RATED);
+        p1=pm.reviewProduct(1000,Rating.FIVE_STAR,"nice");
+        p1=pm.reviewProduct(p1,Rating.FOUR_STAR,"nice");
+        p1=pm.reviewProduct(p1,Rating.THREE_STAR,"good");
+        p1=pm.reviewProduct(p1,Rating.FIVE_STAR,"awesome");
+        p1=pm.reviewProduct(p1,Rating.TWO_STAR,"wow");
+        pm.printProductReport(p1);
 
-        Product p21=pm.createProduct(1001,"Juice",BigDecimal.valueOf(11.0),Rating.NOT_RATED);
-        p21=pm.reviewProduct(1001,Rating.THREE_STAR,"good to drink");
-        p21=pm.reviewProduct(p21,Rating.THREE_STAR,"good ");
-        p21=pm.reviewProduct(p21,Rating.THREE_STAR,"nice");
-        p21=pm.reviewProduct(p21,Rating.THREE_STAR,"just wow");
-        p21=pm.reviewProduct(p21,Rating.THREE_STAR,"very nice");
-        p21=pm.reviewProduct(p21,Rating.THREE_STAR,"very good");
-        pm.printProductReport(p21);
-
+        Product p2=pm.createProduct(1001,"Juice",BigDecimal.valueOf(11.0),Rating.NOT_RATED);
+        p2=pm.reviewProduct(1001,Rating.THREE_STAR,"good to drink");
+        p2=pm.reviewProduct(p2,Rating.THREE_STAR,"good ");
+        p2=pm.reviewProduct(p2,Rating.THREE_STAR,"nice");
+        p2=pm.reviewProduct(p2,Rating.THREE_STAR,"just wow");
+        p2=pm.reviewProduct(p2,Rating.THREE_STAR,"very nice");
+        p2=pm.reviewProduct(p2,Rating.THREE_STAR,"very good");
+        pm.printProductReport(p2);
         System.out.println(pm.products);
 
-        pm.printProducts((p1,p2) ->
-                p2.getRating().ordinal() - p1.getRating().ordinal());
-        pm.printProducts((p1,p2) ->
-                p2.getPrice().compareTo(p1.getPrice()));
 
-        Comparator<Product> ratingSorter =(p1,p2)->
-                p2.getRating().ordinal()-p1.getRating().ordinal();
-        Comparator<Product> priceSorter =(p1,p2)->
-                p2.getPrice().compareTo(p1.getPrice());
+        pm.printProducts((px1,px2) ->
+                px2.getRating().ordinal() - px1.getRating().ordinal(),p->p.getPrice().floatValue()<12);
 
-        pm.printProducts(ratingSorter.thenComparing(priceSorter).reversed());
+        pm.getDiscounts().forEach(
+                (rating,discount)->System.out.println(rating+" \t"+discount)
+        );
+
+
+
+//        pm.printProducts((p1,p2) ->
+//                p2.getPrice().compareTo(p1.getPrice()));
+
+//        Comparator<Product> ratingSorter =(p1,p2)->
+//                p2.getRating().ordinal()-p1.getRating().ordinal();
+//        Comparator<Product> priceSorter =(p1,p2)->
+//                p2.getPrice().compareTo(p1.getPrice());
+
+//        pm.printProducts(ratingSorter.thenComparing(priceSorter).reversed());
 
 /*
-        Product p21= pm.createProduct(1001,"Juices",BigDecimal.valueOf(20),
+        Product p2= pm.createProduct(1001,"Juices",BigDecimal.valueOf(20),
         Rating.FOUR_STAR,LocalDate.now().plusDays(10));
-        System.out.println(p20);
-        System.out.println(p21);
+        System.out.println(p1);
+        System.out.println(p2);
 
 
 
