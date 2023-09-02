@@ -1,13 +1,19 @@
 package entities;
 
+import exceptions.ProductManagerException;
+
 import java.math.BigDecimal;
 import java.text.MessageFormat;
 import java.text.NumberFormat;
+import java.text.ParseException;
+import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
@@ -18,6 +24,11 @@ import java.util.stream.Collectors;
  * @version 1.0
  */
 public class ProductManager {
+    private static final Logger logger=Logger.getLogger(ProductManager.class.getName());
+    private ResourceBundle config=ResourceBundle.getBundle("config");
+    private MessageFormat reviewFormat=new MessageFormat(config.getString("review.data.format"));
+    private MessageFormat productFormat =new MessageFormat(config.getString("product.data.format"));
+
     private Product product;
     private Review review;
 
@@ -61,7 +72,14 @@ public class ProductManager {
     }
 
     public Product reviewProduct(int id, Rating rating, String comments){
-        Product product =findProduct(id);
+        try{
+            Product product =findProduct(id);
+        }catch (ProductManagerException e){
+//            e.printStackTrace();
+            logger.log(Level.INFO, e.getMessage());
+            return null;
+        }
+
         return reviewProduct(product,rating,comments);
     }
 
@@ -70,7 +88,7 @@ public class ProductManager {
         products.remove(product,reviews);
         reviews.add(new Review(rating,comments));
         int sum=0,i=0;
-        product =product.applyRating(
+        this.product =product.applyRating(
                 Rateable.convert(
                         (int)Math.round(
                                 reviews.stream()
@@ -82,12 +100,18 @@ public class ProductManager {
 
         );
 
-        products.put(product,reviews);
+        products.put(this.product,reviews);
         return this.product;
     }
 
     public void printProductReport(int id){
-        Product product=findProduct(id);
+        try{
+            Product product=findProduct(id);
+        }catch (ProductManagerException e){
+//            e.printStackTrace();
+            logger.log(Level.INFO, e.getMessage());
+        }
+
         printProductReport(product);
     }
 
@@ -134,13 +158,50 @@ public class ProductManager {
         System.out.println(txt);
         }
 
+    public void parseReview(String text) throws ProductManagerException{
+        try{
+            Object[] values=reviewFormat.parse(text);
+            reviewProduct(Integer.parseInt((String) values[0]),
+                    Rateable.convert(Integer.parseInt((String) values[1])), (String) values[2]
+                    );
+        }catch (ParseException | NumberFormatException e){
+            logger.log(Level.WARNING,"Error Parsing review"+text,e.getMessage());
+            throw new ProductManagerException("unable to parse review",e);
 
-    public Product findProduct(int id){
+        }
+
+    }
+
+    public void parseProduct(String text){
+        try{
+            Object[] values=productFormat.parse(text);
+            int id=Integer.parseInt((String) values[1]);
+            String name=(String) values[2];
+            BigDecimal price = BigDecimal.valueOf(Double.parseDouble((String) values[3]));
+            Rating rating= Rateable.convert(Integer.parseInt((String) values[4]));
+            switch((String)values[0]){
+                case "D":createProduct(id,name,price,rating);
+                break;
+                case "F": LocalDate bestBefore=LocalDate.parse((String)values[5]);
+                createProduct(id, name, price, rating, bestBefore);
+            }
+        }catch (ParseException | NumberFormatException | DateTimeException e){
+        logger.log(Level.WARNING,"Error Parsing product"+text+" "+e.getMessage());
+        }
+
+
+
+    }
+
+    public Product findProduct(int id) throws ProductManagerException{
 
         return products.keySet().stream().filter(p->p.getId()==id)
                 .findFirst()
-                .orElseGet(()->null);
+                .orElseThrow(()->new ProductManagerException("product with id "+id+" not found"));
     }
+
+
+
 
     public Map<String, String> getDiscounts(){
         return products.keySet()
@@ -157,10 +218,6 @@ public class ProductManager {
                         )
                 );
     }
-
-
-
-
 
 
     public static class ResourceFormatter{
