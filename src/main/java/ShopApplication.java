@@ -4,7 +4,15 @@ import exceptions.ProductManagerException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Ths is a shop class Application containing the main method and this is the entry of the
@@ -15,12 +23,61 @@ import java.util.Locale;
 public class ShopApplication {
     public static void main(String[] args){
 
-        ProductManager pm=new ProductManager(Locale.UK);
-        pm.printProductReport(101);
+        ProductManager pm=ProductManager.getInstance();
+        AtomicInteger clientCount=new AtomicInteger(0);
+        Callable<String> client=()->{
+            String clientId ="Client"+clientCount.incrementAndGet();
+            String threadName=Thread.currentThread().getName();
+            int productId= ThreadLocalRandom.current().nextInt(63)+101;
+            String languageTag=ProductManager.getSupportedLocale().stream()
+                    .skip(ThreadLocalRandom.current().nextInt(4))
+                    .findFirst().get();
+            StringBuilder log=new StringBuilder();
+            log.append(clientId+" "+threadName+"\n-\tstart of log\t-\n");
+            log.append(pm.getDiscounts(languageTag)
+                    .entrySet()
+                    .stream()
+                    .map(entry->entry.getKey()+"\t"+entry.getValue())
+                    .collect(Collectors.joining("\n"))
+            );
+
+            Product product=pm.reviewProduct(productId,Rating.FOUR_STAR,"Yet Another review");
+            log.append((product !=null)
+            ?"\nProduct "+productId+" reviewed\n"
+                    :"\nProduct "+productId+" not Reviewed\n"
+            );
+            pm.printProductReport(productId,languageTag,clientId);
+            log.append(clientId+" generated report for "+productId+" product");
+
+            log.append("\n=\tend of log=\n");
+            return log.toString();
+        };
+
+        List<Callable<String>> clients= Stream.generate(()->client)
+                .limit(5)
+                        .collect(Collectors.toList());
+        ExecutorService executorService= Executors.newFixedThreadPool(3);
+
+        try {
+            List<Future<String>> results = executorService.invokeAll(clients);
+            executorService.shutdown();
+            results.stream().forEach(result->{
+                try {
+                    System.out.println(result.get());
+                } catch (InterruptedException|ExecutionException e) {
+                    Logger.getLogger(ShopApplication.class.getName())
+                            .log(Level.SEVERE,"Error retrieving client log",e);
+                }
+
+            });
+        } catch (InterruptedException e) {
+            Logger.getLogger(ShopApplication.class.getName()).log(Level.SEVERE, "error invoking clients", e);
+        }
+
+
 
 
 //        pm.printProductReport(103);
-
 //        pm.parseProduct("F,1000,herbal Tea,1.69,0,2021-09-01");
 
         pm.createProduct(1000,"Water",BigDecimal.valueOf(10.0),Rating.NOT_RATED);
@@ -29,14 +86,14 @@ public class ShopApplication {
         pm.reviewProduct(1000,Rating.THREE_STAR,"good");
         pm.reviewProduct(1000,Rating.FIVE_STAR,"awesome");
         pm.reviewProduct(1000,Rating.TWO_STAR,"wow");
-        pm.printProductReport(1000);
+//        pm.printProductReport(1000, );
         System.out.println(pm.products);
 
 //        pm.dumpData();
 //        System.out.println("here after dumping"+pm.products);
 //        pm.restoreData();
 //        System.out.println("here after restoring"+pm.products);
-        pm.printProductReport(1000);
+//        pm.printProductReport(1000);
 
 //        try{
 //            pm.parseReview("1000,4,nice hot cup of Herbal tea");
