@@ -1,5 +1,6 @@
 package entities;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Objects;
@@ -10,7 +11,7 @@ import java.util.Objects;
  * @version 1.0
  * @author avinash
  */
-public sealed class Product implements Rateable<Product> permits Food, Drink {
+public sealed class Product implements Rateable<Product>, Serializable permits Food, Drink {
     private int id;
     private String name;
     private BigDecimal price;

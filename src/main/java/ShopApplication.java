@@ -16,41 +16,55 @@ public class ShopApplication {
     public static void main(String[] args){
 
         ProductManager pm=new ProductManager(Locale.UK);
-        pm.parseProduct("F,1000,herbal Tea,1.69,0,2021-09-01");
-//        Product p1= pm.createProduct(1000,"Water",BigDecimal.valueOf(10.0),Rating.NOT_RATED);
-//        p1=pm.reviewProduct(1000,Rating.FIVE_STAR,"nice");
-//        p1=pm.reviewProduct(p1,Rating.FOUR_STAR,"nice");
-//        p1=pm.reviewProduct(p1,Rating.THREE_STAR,"good");
-//        p1=pm.reviewProduct(p1,Rating.FIVE_STAR,"awesome");
-//        p1=pm.reviewProduct(p1,Rating.TWO_STAR,"wow");
+        pm.printProductReport(101);
 
-        try{
-            pm.parseReview("1000,4,nice hot cup of Herbal tea");
-        }catch (ProductManagerException e){
-            Throwable cause=e.getCause();
-        }
 
-//        pm.printProductReport(p1);
+//        pm.printProductReport(103);
+
+//        pm.parseProduct("F,1000,herbal Tea,1.69,0,2021-09-01");
+
+        pm.createProduct(1000,"Water",BigDecimal.valueOf(10.0),Rating.NOT_RATED);
+        pm.reviewProduct(1000,Rating.FIVE_STAR,"nice");
+        pm.reviewProduct(1000,Rating.FOUR_STAR,"nice");
+        pm.reviewProduct(1000,Rating.THREE_STAR,"good");
+        pm.reviewProduct(1000,Rating.FIVE_STAR,"awesome");
+        pm.reviewProduct(1000,Rating.TWO_STAR,"wow");
         pm.printProductReport(1000);
-
-
-        Product p2=pm.createProduct(1001,"Juice",BigDecimal.valueOf(11.0),Rating.NOT_RATED);
-        p2=pm.reviewProduct(1001,Rating.THREE_STAR,"good to drink");
-        p2=pm.reviewProduct(p2,Rating.TWO_STAR,"good ");
-        p2=pm.reviewProduct(p2,Rating.THREE_STAR,"nice");
-        p2=pm.reviewProduct(p2,Rating.THREE_STAR,"just wow");
-        p2=pm.reviewProduct(p2,Rating.THREE_STAR,"very nice");
-        p2=pm.reviewProduct(p2,Rating.THREE_STAR,"very good");
-        pm.printProductReport(p2);
         System.out.println(pm.products);
 
+//        pm.dumpData();
+//        System.out.println("here after dumping"+pm.products);
+//        pm.restoreData();
+//        System.out.println("here after restoring"+pm.products);
+        pm.printProductReport(1000);
 
-        pm.printProducts((px1,px2) ->
-                px2.getRating().ordinal() - px1.getRating().ordinal(),p->p.getPrice().floatValue()<12);
+//        try{
+//            pm.parseReview("1000,4,nice hot cup of Herbal tea");
+//        }catch (ProductManagerException e){
+//            Throwable cause=e.getCause();
+//        }
 
-        pm.getDiscounts().forEach(
-                (rating,discount)->System.out.println(rating+" \t"+discount)
-        );
+//        pm.printProductReport(1000);
+
+
+//        Product p2=pm.createProduct(1001,"Juice",BigDecimal.valueOf(11.0),Rating.NOT_RATED);
+//        p2=pm.reviewProduct(1001,Rating.THREE_STAR,"good to drink");
+//        p2=pm.reviewProduct(p2,Rating.TWO_STAR,"good ");
+//        p2=pm.reviewProduct(p2,Rating.THREE_STAR,"nice");
+//        p2=pm.reviewProduct(p2,Rating.THREE_STAR,"just wow");
+//        p2=pm.reviewProduct(p2,Rating.THREE_STAR,"very nice");
+//        p2=pm.reviewProduct(p2,Rating.THREE_STAR,"very good");
+////        pm.printProductReport(p2);
+//
+//        System.out.println(pm.products);
+//
+//
+//        pm.printProducts((px1,px2) ->
+//                px2.getRating().ordinal() - px1.getRating().ordinal(),p->p.getPrice().floatValue()<12);
+//
+//        pm.getDiscounts().forEach(
+//                (rating,discount)->System.out.println(rating+" \t"+discount)
+//        );
 
 
 
